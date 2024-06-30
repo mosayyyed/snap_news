@@ -1,5 +1,7 @@
 # SnapNews 📱📰
 
+![SnapNews (1920 x 1080 بيكسل) (1)](https://github.com/mosayyyed/snap_news/assets/113109457/d4ce9274-4700-49cd-8812-3615f11096fa)
+
 SnapNews, a helpful news app designed to effortlessly keep you updated with the latest headlines. SnapNews uses the News API to deliver fresh news tailored to your interests, making it perfect for staying informed with ease.
 
 ## Screenshots 📸
