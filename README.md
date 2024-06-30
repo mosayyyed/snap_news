@@ -14,6 +14,7 @@ SnapNews, a helpful news app designed to effortlessly keep you updated with the 
   <img alt="gif" src="https://github.com/mosayyyed/news_app/assets/113109457/9757d9c0-8893-43f4-82b6-0d652a346265" height="350">
 &nbsp; &nbsp; &nbsp; &nbsp;
   <img alt="gif" src="https://github.com/mosayyyed/news_app/assets/113109457/3ce0ab7a-cf4b-4242-a4a5-c09fc331c4e9" height="350">
+  &nbsp; &nbsp; &nbsp; &nbsp;
 </div>
 
 ## Overview ℹ️
