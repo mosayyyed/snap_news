@@ -202,7 +202,7 @@ class _NewsListState extends State<NewsList> {
         const SizedBox(height: 4),
         // Conditionally display description if it's not null
         Text(
-          article.description ?? '',
+          article.description,
           style: const TextStyle(fontSize: 14, color: Colors.grey),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
