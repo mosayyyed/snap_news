@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -82,8 +83,8 @@ class _NewsListState extends State<NewsList> {
       }
       // Filter articles with valid images
       return articles.where((article) {
-        return article.urlToImage.isNotEmpty &&
-            Uri.tryParse(article.urlToImage)?.hasAbsolutePath == true;
+        return article.imageUrl.isNotEmpty &&
+            Uri.tryParse(article.imageUrl)?.hasAbsolutePath == true;
       }).toList();
     } catch (e) {
       debugPrint(
@@ -118,8 +119,7 @@ class _NewsListState extends State<NewsList> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final article = articles[index];
-                final dateTimeMap = formatArticleDateTime(article.publishedAt);
-                return _buildArticleTile(context, article, dateTimeMap);
+                return _buildArticleTile(context, article);
               },
               childCount: articles.length,
             ),
@@ -131,16 +131,17 @@ class _NewsListState extends State<NewsList> {
 
   /// Builds a tile for a single article.
   ///
-  /// Takes the build context, an article, and a map of date and time strings as parameters.
-  Widget _buildArticleTile(BuildContext context, ArticleModel article,
-      Map<String, String> dateTimeMap) {
+  /// Takes the build context and an article as parameters.
+  Widget _buildArticleTile(BuildContext context, ArticleModel article) {
+    final dateTimeMap =
+        article.formattedDateTime; // Use formattedDateTime method
     return GestureDetector(
       onTap: () => showArticleDetails(context, article),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            _buildArticleImage(article.urlToImage),
+            _buildArticleImage(article.imageUrl),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -158,30 +159,25 @@ class _NewsListState extends State<NewsList> {
   /// Takes a URL string as a parameter.
   Widget _buildArticleImage(String? imageUrl) {
     return Container(
-      height: 100,
-      width: 100,
+      height: 110,
+      width: 110,
       decoration: BoxDecoration(
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 3,
-            offset: Offset(0, 6),
-          ),
-        ],
         borderRadius: BorderRadius.circular(23),
       ),
-      child: imageUrl != null && imageUrl.isNotEmpty
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(23),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.broken_image, size: 95);
-                },
-              ),
-            )
-          : const Icon(Icons.broken_image, size: 95),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(23),
+        child: CachedNetworkImage(
+          imageUrl: imageUrl ?? '',
+          fit: BoxFit.cover,
+          placeholder: (context, url) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          errorWidget: (context, url, error) => Image.asset(
+            "assets/placeholder.jpg",
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
     );
   }
 

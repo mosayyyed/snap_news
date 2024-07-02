@@ -41,6 +41,7 @@ dependencies:
   share: ^2.0.4
   flutter_native_splash: ^2.4.0
   envied: ^0.5.4+1
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +70,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
   - assets/onboarding_images/
+  - assets/placeholder.jpg
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

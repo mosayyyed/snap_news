@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,8 @@ class BreakingNewsList extends StatefulWidget {
 }
 
 class _BreakingNewsListState extends State<BreakingNewsList> {
-  List<ArticleModel> topArticles = [];
+  List<ArticleModel> breakingNews = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -21,17 +23,19 @@ class _BreakingNewsListState extends State<BreakingNewsList> {
     _fetchBreakingArticles();
   }
 
-  final newsService = NewsService(Dio());
+  final NewsService newsService = NewsService(Dio());
 
   Future<void> _fetchBreakingArticles() async {
     try {
       final fetchedArticles = await newsService.getBreakingNews();
       if (mounted) {
         setState(() {
-          topArticles = fetchedArticles.where((article) {
-            return article.urlToImage.isNotEmpty &&
-                Uri.tryParse(article.urlToImage)?.hasAbsolutePath == true;
+          // Filter articles directly when assigning to the list
+          breakingNews = fetchedArticles.where((article) {
+            return article.imageUrl.isNotEmpty &&
+                Uri.tryParse(article.imageUrl)?.hasAbsolutePath == true;
           }).toList();
+          isLoading = false;
         });
       }
     } catch (e) {
@@ -39,6 +43,9 @@ class _BreakingNewsListState extends State<BreakingNewsList> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error loading news: $e')),
         );
+        setState(() {
+          isLoading = false;
+        });
       }
     }
   }
@@ -48,35 +55,32 @@ class _BreakingNewsListState extends State<BreakingNewsList> {
     return SliverToBoxAdapter(
       child: SizedBox(
         height: 220,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: topArticles.length,
-          itemBuilder: (context, index) {
-            final article = topArticles[index];
-            final dateTimeMap = formatArticleDateTime(
-                article.publishedAt); // Format date and time
-            return _buildNewsArticleCard(article, dateTimeMap);
-          },
-        ),
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: breakingNews.length,
+                itemBuilder: (context, index) {
+                  final article = breakingNews[index];
+                  return _buildNewsArticleCard(article);
+                },
+              ),
       ),
     );
   }
 
-  Widget _buildNewsArticleCard(
-      ArticleModel article, Map<String, String> dateTimeMap) {
+  Widget _buildNewsArticleCard(ArticleModel article) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: NewsArticleCard(article: article, dateTimeMap: dateTimeMap),
+      child: NewsArticleCard(article: article),
     );
   }
 }
 
 class NewsArticleCard extends StatefulWidget {
   final ArticleModel article;
-  final Map<String, String> dateTimeMap; // Add dateTimeMap parameter
 
-  const NewsArticleCard(
-      {super.key, required this.article, required this.dateTimeMap});
+  const NewsArticleCard({super.key, required this.article});
 
   @override
   NewsArticleCardState createState() => NewsArticleCardState();
@@ -101,23 +105,22 @@ class NewsArticleCardState extends State<NewsArticleCard> {
                   Color(0x66000000),
                   BlendMode.darken,
                 ),
-                child: Image.network(
-                  widget.article.urlToImage,
+                child: CachedNetworkImage(
+                  imageUrl: widget.article.imageUrl,
                   fit: BoxFit.cover,
                   height: 244,
                   width: 244,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const Center(child: CircularProgressIndicator());
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        color: Colors.white,
-                      ),
-                    );
-                  },
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorWidget: (context, url, error) => Center(
+                    child: Image.asset(
+                      "assets/placeholder.jpg",
+                      fit: BoxFit.cover,
+                      height: 244,
+                      width: 244,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -130,8 +133,7 @@ class NewsArticleCardState extends State<NewsArticleCard> {
               bottom: 0,
               left: 0,
               right: 0,
-              child: NewsArticleDetails(
-                  article: widget.article, dateTimeMap: widget.dateTimeMap),
+              child: NewsArticleDetails(article: widget.article),
             ),
           ],
         ),
@@ -172,10 +174,8 @@ class NewsArticleCardState extends State<NewsArticleCard> {
 
 class NewsArticleDetails extends StatelessWidget {
   final ArticleModel article;
-  final Map<String, String> dateTimeMap; // Add dateTimeMap parameter
 
-  const NewsArticleDetails(
-      {super.key, required this.article, required this.dateTimeMap});
+  const NewsArticleDetails({super.key, required this.article});
 
   @override
   Widget build(BuildContext context) {
@@ -196,25 +196,26 @@ class NewsArticleDetails extends StatelessWidget {
             maxLines: 2,
           ),
           const SizedBox(height: 8),
-          _buildArticleDateTimeRow(dateTimeMap),
+          _buildArticleDateTimeRow(),
         ],
       ),
     );
   }
 
-  Widget _buildArticleDateTimeRow(Map<String, String> dateTimeMap) {
+  Widget _buildArticleDateTimeRow() {
+    final formattedDateTime = article.formattedDateTime;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          dateTimeMap['time'] ?? '',
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
+          formattedDateTime['time'] ?? '',
+          style: const TextStyle(fontSize: 12, color: Colors.white),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         Text(
-          dateTimeMap['date'] ?? '',
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
+          formattedDateTime['date'] ?? '',
+          style: const TextStyle(fontSize: 12, color: Colors.white),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

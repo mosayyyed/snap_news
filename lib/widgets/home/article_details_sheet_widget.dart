@@ -1,24 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/article_model.dart';
-
-/// Formats the date and time of the article.
-///
-/// Takes a string representation of a date and returns a map with the formatted date and time.
-/// If the date string is invalid, it returns 'Invalid Date' and 'Invalid Time'.
-Map<String, String> formatArticleDateTime(String dateString) {
-  try {
-    final dateTime = DateTime.parse(dateString);
-    final formattedDate = DateFormat('dd MMM').format(dateTime);
-    final formattedTime = DateFormat('hh:mm a').format(dateTime);
-    return {'date': formattedDate, 'time': formattedTime};
-  } catch (e) {
-    return {'date': 'Invalid Date', 'time': 'Invalid Time'};
-  }
-}
 
 /// Displays the details of an article in a modal bottom sheet.
 ///
@@ -35,34 +20,35 @@ void showArticleDetails(BuildContext context, ArticleModel article) {
       minChildSize: 0.5,
       maxChildSize: 1.0,
       builder: (context, scrollController) {
+        final dateTimeMap =
+            article.formattedDateTime; // Use formattedDateTime method
         return Stack(
           children: [
             // Background Image
-            if (article.urlToImage.isNotEmpty &&
-                Uri.tryParse(article.urlToImage)?.hasAbsolutePath == true)
+            if (article.imageUrl
+                    .isNotEmpty && // Assuming the correct property name is imageUrl
+                Uri.tryParse(article.imageUrl)?.hasAbsolutePath == true)
               Hero(
-                tag: article.urlToImage,
+                tag: article.imageUrl,
                 child: ClipRRect(
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(36)),
-                  child: Image.network(
-                    article.urlToImage,
+                  child: CachedNetworkImage(
+                    imageUrl: article.imageUrl,
                     fit: BoxFit.cover,
                     height: 330,
                     width: double.infinity,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return const Center(child: CircularProgressIndicator());
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          color: Colors.white,
-                          size: 100,
-                        ),
-                      );
-                    },
+                    placeholder: (context, url) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorWidget: (context, url, error) => Center(
+                      child: Image.asset(
+                        "assets/placeholder.jpg",
+                        fit: BoxFit.cover,
+                        height: 330,
+                        width: double.infinity,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -111,7 +97,7 @@ void showArticleDetails(BuildContext context, ArticleModel article) {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            formatArticleDateTime(article.publishedAt)['time']!,
+                            dateTimeMap['time']!,
                             style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xff08022B)),
@@ -124,7 +110,7 @@ void showArticleDetails(BuildContext context, ArticleModel article) {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            formatArticleDateTime(article.publishedAt)['date']!,
+                            dateTimeMap['date']!,
                             style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xff08022B)),

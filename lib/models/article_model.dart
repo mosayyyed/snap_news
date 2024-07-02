@@ -1,8 +1,10 @@
+import 'package:intl/intl.dart';
+
 class ArticleModel {
   final String title;
   final String description;
   final String url;
-  final String urlToImage;
+  final String imageUrl;
   final String publishedAt;
   final String content;
 
@@ -10,19 +12,30 @@ class ArticleModel {
     required this.title,
     required this.description,
     required this.url,
-    required this.urlToImage,
+    required this.imageUrl,
     required this.publishedAt,
     required this.content,
   });
 
   factory ArticleModel.fromJson(Map<String, dynamic> json) {
     return ArticleModel(
-      title: json['title'] ?? 'No Title',
-      description: json['description'] ?? 'No Description',
-      url: json['url'] ?? 'No URL',
-      urlToImage: json['urlToImage'] ?? '',
-      publishedAt: json['publishedAt'] ?? 'No Date',
-      content: json['content'] ?? 'No Content',
+      title: json['title'] ?? 'Unknown Title',
+      description: json['description'] ?? 'No Description Available',
+      url: json['url'] ?? '',
+      imageUrl: json['urlToImage'] ?? '',
+      publishedAt: json['publishedAt'] ?? '',
+      content: json['content'] ?? '',
     );
+  }
+
+  Map<String, String> get formattedDateTime {
+    try {
+      final dateTime = DateTime.parse(publishedAt);
+      final formattedDate = DateFormat('dd MMM').format(dateTime);
+      final formattedTime = DateFormat('hh:mm a').format(dateTime);
+      return {'date': formattedDate, 'time': formattedTime};
+    } catch (e) {
+      return {'date': 'N/A', 'time': 'N/A'};
+    }
   }
 }
