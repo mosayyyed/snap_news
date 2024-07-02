@@ -13,7 +13,7 @@ Map<String, String> formatArticleDateTime(String dateString) {
   try {
     final dateTime = DateTime.parse(dateString);
     final formattedDate = DateFormat('dd MMM').format(dateTime);
-    final formattedTime = DateFormat('HH:mm').format(dateTime);
+    final formattedTime = DateFormat('hh:mm a').format(dateTime);
     return {'date': formattedDate, 'time': formattedTime};
   } catch (e) {
     return {'date': 'Invalid Date', 'time': 'Invalid Time'};
