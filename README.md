@@ -47,6 +47,12 @@ The application is built with responsiveness in mind, ensuring that it adapts se
     ```bash
     cd snapnews
     ```
+4. Add your API key:
+  Create a .env file in the root directory of the project.
+  Add your API key to the .env file like this:
+    ```bash
+    API_KEY=your_api_key_here
+    ```
 3. Install dependencies:
     ```bash
     flutter pub get
