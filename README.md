@@ -49,14 +49,15 @@ The application is built with responsiveness in mind, ensuring that it adapts se
     cd snapnews
     ```
 
-3. **Add your API key:** 
+3. **Add your API key:**
+   - Register and get your API key from [News API](https://newsapi.org/).
    - Create a `.env` file in the root directory of the project.
    - Add your API key to the `.env` file like this:
      ```env
      API_KEY=your_api_key_here
      ```
 
-   > **Note:** Don't forget to add your API key in the `.env` file with the help of the [flutter_dotenv](https://pub.dev/packages/flutter_dotenv) package.
+   > **Note:** Don't forget to add your API key in the `.env` file with the help of the [envied](https://pub.dev/packages/envied) package to keep it secure.
 
 4. **Install dependencies:**
     ```bash
